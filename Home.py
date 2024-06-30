@@ -1,0 +1,180 @@
+import streamlit as st
+import altair as alt
+from streamlit_gsheets import GSheetsConnection
+from babel.numbers import format_currency
+def app():
+
+#Styling the layout
+    st.markdown("""
+        <style>
+            style.element{
+                padding-top:0;
+            }
+            #ycc-finance{
+                padding-top: 10px;
+            }
+    
+            .card {
+                background-color: #010F18;
+                padding: 15px;
+                border:2px solid #25243B;
+                border-radius: 10px;
+                box-shadow: 10px 7px rgba(2,2,26,0.9);
+                margin-bottom: 20px;
+                
+            }
+            .header {
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }   
+            .text{
+                padding-top:10px;
+                text-align: center;
+            }
+            .yo{
+                font-size:13px;
+            }      
+         </style>
+            """,unsafe_allow_html=True
+
+    )
+    
+
+
+#------------------------------------------------------------------------------------  
+#Loading the data
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    data = conn.read(worksheet="Main", usecols=list(range(7)),ttl=3)
+
+    
+#Calculations
+
+    #Calculation of receives
+    tot_rec=data[(data["Type"]=="Receive")]
+        #Calculate the amount receive
+    receipt = tot_rec["Amount"].sum()
+    
+        
+        
+        #Calculation of expense
+    tot_exp= data[(data["Type"]=="Expense")]
+    expense= tot_exp["Amount"].sum()
+   
+    closing_balance= receipt-expense
+    #Format currency
+    receipt_display = format_currency(receipt, 'INR', locale='en_IN')
+    expense_display = format_currency(expense, 'INR', locale='en_IN')
+    closing_balance_display = format_currency(closing_balance, 'INR', locale='en_IN')
+#-----------------------------------------------------------------------------------------------------------------   
+    
+    st.header('YCC Finance',divider='rainbow')
+#-----------------------------------------------------------------------------------------------------------------
+    
+    # Metric Section
+    cols = st.columns(3)
+    with cols[0]:
+        st.markdown(f'<div class="card"><p class="yo">Total Receives</p><h3 class="text">{receipt_display}</h3></div>', unsafe_allow_html=True)
+    with cols[1]:
+        st.markdown(f'<div class="card"><p class="yo">Total Expenses</p><h3 class="text">{expense_display}</h3></div>', unsafe_allow_html=True)
+    with cols[2]:
+        st.markdown(f'<div class="card"><p class="yo">Closing Balance</p><h3 class="text">{closing_balance_display}</h3></div>', unsafe_allow_html=True)
+    st.divider()
+
+#----------------------------------------------------------------------------------------------------
+#Calculation section
+
+    # Aggregate data by summing amounts for each "Particulars"
+    expenses = data[data['Type'] == 'Expense'].groupby('Particulars', as_index=False).sum()
+    receives = data[data['Type'] == 'Receive'].groupby('Particulars', as_index=False).sum()
+    total_receives = receives['Amount'].sum()
+    total_expenses = expenses['Amount'].sum()
+
+    #Display the values in Indian Currency ₹
+    receives['Amount'] = receives['Amount'].apply(lambda x: format_currency(x, 'INR', locale='en_IN'))
+    expenses['Amount'] = expenses['Amount'].apply(lambda x: format_currency(x, 'INR', locale='en_IN'))
+    total_receives = format_currency(total_receives, 'INR', locale='en_IN')
+    total_expenses = format_currency(total_expenses, 'INR', locale='en_IN')
+
+   
+#----------------------------------------------------------------------------------------------------------
+#Data Visulization
+    
+    expenses = data[data['Type'] == 'Expense'].groupby('Particulars', as_index=False).sum()
+    receives = data[data['Type'] == 'Receive'].groupby('Particulars', as_index=False).sum()
+    # Create bar charts with text labels
+   
+    receives_chart = alt.Chart(receives).mark_bar().encode(
+        x='Particulars',
+        y='Amount',
+        color='Particulars'
+    ).properties(
+        
+    )
+
+    receives_text = receives_chart.mark_text(
+        align='center',
+        baseline='middle',
+        dy=-10  # Adjust the position of the text
+    ).encode(
+        text='Amount:Q'
+    )
+ 
+    expenses_chart = alt.Chart(expenses).mark_bar().encode(
+        x='Particulars',
+        y='Amount',
+        color='Particulars'
+    ).properties(
+    )
+
+    expenses_text = expenses_chart.mark_text(
+        align='center',
+        baseline='middle',
+        dy=-10  # Adjust the position of the text
+    ).encode(
+        text='Amount:Q'
+    )
+
+    st.subheader('Receives')
+    st.altair_chart(receives_chart + receives_text, use_container_width=True)
+
+    st.subheader('Expenses')
+    st.altair_chart(expenses_chart + expenses_text, use_container_width=True)
+    
+#----------------------------------------------------------------------------------------------------------------
+    st.divider()
+#-----------------------------------------------------------------------------------------------------------------
+    col1, col2 = st.columns(2)
+
+    # Display aggregated data in table format
+    with col1:
+        st.subheader("Receives")
+        st.table(receives[['Particulars', 'Amount']])
+        st.write(f"**Total Receives: {total_receives}**")
+
+    with col2:
+        st.subheader("Expenses")
+        st.table(expenses[['Particulars', 'Amount']])
+        st.write(f"**Total Expenses: {total_expenses}**")
+
+    st.header("",divider="rainbow")
+    st.header("Mission")
+
+    mis_rec=data[(data["Type"]=="Receive")&(data['Particulars']=="Mission")]
+    mis_exp=data[(data["Type"]=="Expense")&(data['Particulars']=="Mission")]
+    rec=mis_rec['Amount'].sum()
+    
+    exp=mis_exp['Amount'].sum()
+    
+    bal=rec-exp
+    rec_inr = format_currency(rec, 'INR', locale='en_IN')
+    exp_inr= format_currency(exp, 'INR', locale='en_IN')
+    bal_inr=format_currency(bal, 'INR', locale='en_IN')
+
+    x,y,z=st.columns(3)
+    with x:
+        st.write(f'**Mission Received**: {rec_inr}') 
+    with y:
+        st.write(f'**Mission Spent**: {exp_inr}') 
+    with z:
+        st.write(f'**Balance**: {bal_inr}') 
