@@ -159,8 +159,7 @@ def app():
         st.table(expenses[['Particulars', 'Amount']])
         st.write(f"**Total Expenses: {total_expenses}**")
 
-    st.header("",divider="rainbow")
-    st.dataframe(data)
+    
     st.header("",divider='rainbow')
 #----------------------------------------------------------------------------------------------------------
 # Map month names to their corresponding numeric values
