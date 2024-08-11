@@ -158,23 +158,4 @@ def app():
         st.write(f"**Total Expenses: {total_expenses}**")
 
     st.header("",divider="rainbow")
-    st.header("Mission")
-
-    mis_rec=data[(data["Type"]=="Receive")&(data['Particulars']=="Mission")]
-    mis_exp=data[(data["Type"]=="Expense")&(data['Particulars']=="Mission")]
-    rec=mis_rec['Amount'].sum()
     
-    exp=mis_exp['Amount'].sum()
-    
-    bal=rec-exp
-    rec_inr = format_currency(rec, 'INR', locale='en_IN')
-    exp_inr= format_currency(exp, 'INR', locale='en_IN')
-    bal_inr=format_currency(bal, 'INR', locale='en_IN')
-
-    x,y,z=st.columns(3)
-    with x:
-        st.write(f'**Mission Received**: {rec_inr}') 
-    with y:
-        st.write(f'**Mission Spent**: {exp_inr}') 
-    with z:
-        st.write(f'**Balance**: {bal_inr}') 

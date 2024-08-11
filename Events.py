@@ -44,7 +44,7 @@ def app():
     conn = st.connection("gsheets", type=GSheetsConnection)
 
     # Manually specify the worksheet names if they are known
-    worksheet_names = ["Victory Run ", "Delhi Mission Trip", "Sikkim-Nepal Mission Trip"," Delhi Mission Trip 2022-23","Thanksgiving 2023"]  # Replace with your actual worksheet names
+    worksheet_names = ["Victory Run ", "Delhi Mission Trip", "Sikkim-Nepal Mission Trip"," Delhi Mission Trip 2022-23","Thanksgiving 2023","Thanksgiving 2024"]  # Replace with your actual worksheet names
 
     # Create a widget to select a worksheet
     selected_worksheet = st.selectbox("Select Events", options=worksheet_names)
@@ -52,8 +52,7 @@ def app():
     # Read data from the selected worksheet
     data = conn.read(worksheet=selected_worksheet, usecols=list(range(7)),ttl=3)
 
-    # Display the dataframe
-    st.dataframe(data,use_container_width=True)
+    
 
     tot_rec=data[(data["Type"]=="Receive")]
         #Calculate the amount receive
@@ -147,6 +146,8 @@ def app():
     
 #----------------------------------------------------------------------------------------------------------------
     st.divider()
+    # Display the dataframe
+    st.dataframe(data,use_container_width=True)
 #-----------------------------------------------------------------------------------------------------------------
     col1, col2 = st.columns(2)
 
@@ -162,3 +163,4 @@ def app():
         st.write(f"**Total Expenses: {total_expenses}**")
 
     st.header("",divider="rainbow")
+    st.markdown("**Note:** All closing balances of each event are transferred to the YCC account.")
