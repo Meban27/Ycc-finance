@@ -1,5 +1,4 @@
 altair==5.3.0
-Babel==2.11.0
 Babel==2.15.0
 pandas==2.2.2
 st_gsheets_connection==0.0.4
