@@ -4,6 +4,7 @@ import Details, Events, Coffee, Home, About
 
 st.set_page_config(
     page_title="YCC Finance",
+    layout="wide"
 )
 
 class Multiapp:
@@ -21,7 +22,7 @@ class Multiapp:
         hide_st_style = """
         <style>
            header{
-              
+              visibility:hidden;
               padding-top:0px;
               border-top:0px;
               padding-top:0px;
